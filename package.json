@@ -5,11 +5,15 @@
   "main": "index.js",
   "my-type": "module",
   "scripts": {
+    "start": "SET NODE_ENV=production && node index.js",
+    "dev": "SET NODE_ENV=development && nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^14.3.0"
+    "dotenv": "^14.3.0",
+    "ejs": "^3.1.6",
+    "express": "^4.17.2"
   }
 }
