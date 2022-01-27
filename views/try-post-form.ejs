@@ -1,0 +1,22 @@
+<%- include('parts/html-header') %> <%- include('parts/navbar') %>
+<div class="container">
+  <form method="post">
+    <div class="mb-3">
+      <label for="" class="form-label">Email address</label>
+      <input type="text" class="form-control" name="email" />
+      <% if(typeof email !== 'undefined'){ %>
+      <div id="emailHelp" class="form-text"><%= email %></div>
+      <% } %>
+    </div>
+    <div class="mb-3">
+      <label for="" class="form-label">Password</label>
+      <input type="password" class="form-control" name="password" />
+      <% if(locals.password){ %>
+      <div id="emailHelp" class="form-text"><%= password %></div>
+      <% } %>
+    </div>
+    <% console.log(locals); %>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
+<%- include('parts/scripts') %> <%- include('parts/html-foot') %>
