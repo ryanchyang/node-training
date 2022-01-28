@@ -5,7 +5,8 @@ dotenv.config({ path: './config.env' });
 const express = require('express');
 const multer = require('multer');
 const app = express();
-const upload = multer({ dest: 'tmp_uploads/' });
+// const upload = multer({ dest: 'tmp_uploads/' }); // 暫存路徑
+const upload = require('./modules/upload-imgs');
 const fs = require('fs').promises;
 
 app.set('view engine', 'ejs');
@@ -59,19 +60,39 @@ app.post('/try-post-form', (req, res) => {
 });
 
 app.post('/try-upload', upload.single('avatar'), async function (req, res) {
-  const types = ['image/jpeg', 'image/png'];
-  const file = req.file;
-  if (file && file.originalname) {
-    if (types.includes(file.mimetype)) {
-      await fs.rename(
-        file.path,
-        `${__dirname}/public/img/${file.originalname}` //磁碟的路徑
-      );
-      return res.redirect(`/img/${file.originalname}`); //網站的路徑
-    }
-  }
+  res.json(req.file);
+  // const types = ['image/jpeg', 'image/png'];
+  // const file = req.file;
+  // if (file && file.originalname) {
+  //   if (types.includes(file.mimetype)) {
+  //     await fs.rename(
+  //       file.path,
+  //       `${__dirname}/public/img/${file.originalname}` //磁碟的路徑
+  //     );
+  //     return res.redirect(`/img/${file.originalname}`); //網站的路徑
+  //   } else {
+  //     return res.send('傳輸檔案失敗');
+  //   }
+  // }
+  // res.send('bad');
+});
 
-  res.send('傳輸失敗');
+app.post('/try-uploads', upload.array('photos'), async function (req, res) {
+  // console.log(req.files);
+  const fileArray = [...req.files];
+  // const fileObj = {};
+  // const sendArray = fileArray.map((obj) => {
+  //   fileObj.mimetype = obj.mimetype;
+  //   fileObj.originalname = obj.originalname;
+  //   fileObj.size = obj.size;
+
+  //   return fileObj;
+  // });
+
+  const result = fileArray.map(({ mimetype, filename, size }) => {
+    return { mimetype, filename, size };
+  });
+  res.json(result);
 });
 
 app.use(function (req, res) {
