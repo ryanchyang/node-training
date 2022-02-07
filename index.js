@@ -19,6 +19,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static('public'));
 
+// 自訂的middleware
+app.use((req, res, next) => {
+  res.locals.ryan = '哈囉';
+  next();
+});
+
 app.get('/', function (req, res) {
   res.render('home', { name: 'Ryan' });
 });
@@ -94,6 +100,25 @@ app.post('/try-uploads', upload.array('photos'), async function (req, res) {
   });
   res.json(result);
 });
+
+app.get('/my-params1/:action/:id', function (req, res) {
+  res.json(req.params);
+});
+
+app.get('/my-params1/:action?/:id?', function (req, res) {
+  res.json(req.params);
+});
+
+app.get(/^\/m\/09\d{2}\-?\d{3}\-?\d{3}$/i, function (req, res) {
+  let u = req.url;
+  u = u.split('?')[0];
+  u = u.slice(3);
+  u = u.replaceAll('-', ''); // u.split('-').join('')
+  res.json({ mobile: u });
+});
+
+const admin2Router = require('./routes/admin2');
+app.use('/admin2', admin2Router);
 
 app.use(function (req, res) {
   res.status(404).send('走錯路了');
