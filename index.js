@@ -3,11 +3,16 @@ console.log(process.env.NODE_ENV);
 const dotenv = require('dotenv');
 dotenv.config({ path: './config.env' });
 const express = require('express');
+const session = require('express-session');
+const MysqlStore = require('express-mysql-session')(session);
+const moment = require('moment-timezone');
 const multer = require('multer');
 const app = express();
 // const upload = multer({ dest: 'tmp_uploads/' }); // 暫存路徑
 const upload = require('./modules/upload-imgs');
 const fs = require('fs').promises;
+const db = require('./modules/connect-db');
+const sessionStore = new MysqlStore({}, db);
 
 app.set('view engine', 'ejs');
 // app.get('/a.html', function (req, res) {
@@ -19,9 +24,27 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static('public'));
 
+app.use(
+  session({
+    // 新用戶沒有使用到 session 物件時不會建立 session 和發送 cookie
+    saveUninitialized: false, // 沒設定session變數就不會存取
+    resave: false, // 沒變更內容是否強制回存
+    secret: 'asdasff1458144gggmjkkl13344564xvvfg',
+    store: sessionStore,
+    cookie: {
+      maxAge: 1200000, // 20分鐘，單位毫秒
+    },
+  })
+);
+
 // 自訂的middleware
 app.use((req, res, next) => {
   res.locals.ryan = '哈囉';
+
+  // template helper functions
+  res.locals.toDateString = (d) => moment(d).format('YYYY-MM-DD');
+  res.locals.toDateTimeString = (d) => moment(d).format('YYYY-MM-DD HH:mm:ss');
+
   next();
 });
 
@@ -119,6 +142,32 @@ app.get(/^\/m\/09\d{2}\-?\d{3}\-?\d{3}$/i, function (req, res) {
 
 const admin2Router = require('./routes/admin2');
 app.use('/admin2', admin2Router);
+
+app.use('/address-book', require('./routes/adress-book'));
+
+app.get('/try-session', (req, res) => {
+  req.session.my_var = req.session.my_var || 0;
+  req.session.my_var++;
+  res.json(req.session);
+});
+
+app.get('/try-moment', (req, res) => {
+  const fm = 'YYYY-MM-DD HH:mm:ss';
+
+  res.json({
+    mo1: moment().format(fm),
+    mo2: moment().tz('Europe/London').format(fm),
+    mo3: moment(req.session.cookie.expires).format(fm),
+    mo4: moment(req.session.cookie.expires).tz('Europe/London').format(fm),
+  });
+});
+
+app.get('/try-db', async (req, res) => {
+  const sql = `SELECT * FROM address_book LIMIT 5`;
+
+  const [results, fields] = await db.query(sql);
+  res.json(results);
+});
 
 app.use(function (req, res) {
   res.status(404).send('走錯路了');

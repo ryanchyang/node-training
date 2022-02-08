@@ -1,3 +1,4 @@
 .vscode
-/public
+/public/bootstrap
+/public/fontawesome
 /node_modules
