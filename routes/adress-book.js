@@ -11,6 +11,15 @@ async function getListData(req, res) {
     res.redirect('/address-book/list');
   }
 
+  const conditions = {};
+  let search = req.query.search ? req.query.search : '';
+  search = search.trim();
+  let sqlWhere = 'WHERE 1';
+  if (search) {
+    sqlWhere += ` AND \`name\` LIKE ${db.escape('%' + search + '%')}`;
+    conditions.search = search;
+  }
+
   const output = {
     // success: false,
     perPage,
@@ -18,9 +27,10 @@ async function getListData(req, res) {
     totalRows: 0,
     totalPages: 0,
     rows: [],
+    conditions,
   };
 
-  const t_sql = 'SELECT COUNT(1) num FROM address_book';
+  const t_sql = `SELECT COUNT(1) num FROM address_book ${sqlWhere}`;
   const [rs1] = await db.query(t_sql);
   const totalRows = rs1[0].num;
   let totalPages = 0;
@@ -31,7 +41,7 @@ async function getListData(req, res) {
     if (page > output.totalPages) {
       res.redirect('/address-book/list');
     }
-    const sql = `SELECT * FROM address_book LIMIT ${
+    const sql = `SELECT * FROM address_book ${sqlWhere} ORDER BY sid DESC LIMIT ${
       perPage * (page - 1)
     } ,${perPage}`;
 
@@ -45,6 +55,12 @@ async function getListData(req, res) {
   // res.render('address-book/list', output);
 }
 
+router.get('/', async (req, res) => {
+  res.redirect('/address-book/list');
+});
+router.get('/add', async (req, res) => {
+  res.render('address-book/add', await getListData(req, res));
+});
 router.get('/list', async (req, res) => {
   res.render('address-book/list', await getListData(req, res));
 });
