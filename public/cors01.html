@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <pre id="pre"></pre>
+
+    <script>
+      fetch('http://localhost:3000/address-book/api/list')
+        //cors 跨網域要求api (ajax)時 會被阻擋
+        // 同源必須http domain port 都要一樣
+        .then((r) => r.json())
+        .then((obj) => {
+          console.log(obj);
+          document.querySelector('#pre').innerText = JSON.stringify(
+            obj,
+            null,
+            4
+          );
+        });
+    </script>
+  </body>
+</html>

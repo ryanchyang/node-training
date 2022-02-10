@@ -7,6 +7,7 @@ const session = require('express-session');
 const MysqlStore = require('express-mysql-session')(session);
 const moment = require('moment-timezone');
 const multer = require('multer');
+const cors = require('cors');
 const app = express();
 // const upload = multer({ dest: 'tmp_uploads/' }); // 暫存路徑
 const upload = require('./modules/upload-imgs');
@@ -20,8 +21,9 @@ app.set('view engine', 'ejs');
 // });
 
 // Top-level middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(cors());
+app.use(express.json()); // application/json
+app.use(express.urlencoded({ extended: false })); // application/x-www-form-urlencoded
 app.use(express.static('public'));
 app.use(express.static('node_modules/joi')); // 把設成靜態檔案位置 再用前端script引入
 
