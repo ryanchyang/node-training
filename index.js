@@ -13,6 +13,8 @@ const app = express();
 const upload = require('./modules/upload-imgs');
 const fs = require('fs').promises;
 const db = require('./modules/connect-db');
+const fetch = require('node-fetch');
+const axios = require('axios');
 const sessionStore = new MysqlStore({}, db);
 
 app.set('view engine', 'ejs');
@@ -21,7 +23,14 @@ app.set('view engine', 'ejs');
 // });
 
 // Top-level middleware
-app.use(cors());
+const corsOptions = {
+  credentials: true,
+  origin: function (origin, callback) {
+    // console.log('origin:' + origin);
+    callback(null, true);
+  },
+};
+app.use(cors(corsOptions));
 app.use(express.json()); // application/json
 app.use(express.urlencoded({ extended: false })); // application/x-www-form-urlencoded
 app.use(express.static('public'));
@@ -144,6 +153,7 @@ app.get(/^\/m\/09\d{2}\-?\d{3}\-?\d{3}$/i, function (req, res) {
 });
 
 const admin2Router = require('./routes/admin2');
+const { func } = require('joi');
 app.use('/admin2', admin2Router);
 
 app.use('/address-book', require('./routes/adress-book'));
@@ -170,6 +180,20 @@ app.get('/try-db', async (req, res) => {
 
   const [results, fields] = await db.query(sql);
   res.json(results);
+});
+
+app.get('/yahoo', async function (req, res) {
+  // 後端的fetch功能
+  fetch('https://tw.yahoo.com/?p=us')
+    .then((r) => r.text())
+    .then((txt) => res.send(txt));
+});
+
+app.get('/yahoo2', async function (req, res) {
+  // 後端的fetch功能
+  const response = await axios('https://tw.yahoo.com/?p=us');
+
+  res.send(response.data);
 });
 
 app.use(function (req, res) {

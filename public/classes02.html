@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      class Animal {
+        constructor(name) {
+          this.name = name;
+          Animal._count = Animal._count || 0;
+          Animal._count++;
+        }
+
+        move() {
+          console.log('移動');
+        }
+        info() {
+          return this.name;
+        }
+
+        toString() {
+          return '名字:' + this.name;
+        }
+
+        static setCount() {
+          return Animal_count;
+        }
+      }
+
+      class Human extends Animal {
+        #human;
+        constructor(name, gender = 'm') {
+          super(name);
+          this.gender = gender;
+          this.#human = 23;
+          //
+        }
+
+        addHuman() {
+          this.#human++;
+          return this.#human;
+        }
+        move() {
+          return super.move() + ' 跑步';
+        }
+      }
+
+      const a1 = new Animal('小白');
+      console.log(a1.info());
+      console.log('' + a1);
+      console.log(a1 instanceof Animal);
+      console.log(a1.move());
+      console.log('---------------------');
+
+      const h1 = new Human('小明');
+      console.log(h1.info());
+      console.log(h1.toString());
+      console.log(h1.gender);
+      console.log(h1 instanceof Animal);
+      console.log(h1.move());
+      console.log(h1.addHuman());
+      // console.log(h1.#human);
+    </script>
+  </body>
+</html>
