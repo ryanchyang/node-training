@@ -14,8 +14,11 @@ const upload = require('./modules/upload-imgs');
 const fs = require('fs').promises;
 const db = require('./modules/connect-db');
 const fetch = require('node-fetch');
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const axios = require('axios');
 const sessionStore = new MysqlStore({}, db);
+
 
 app.set('view engine', 'ejs');
 // app.get('/a.html', function (req, res) {
@@ -154,6 +157,7 @@ app.get(/^\/m\/09\d{2}\-?\d{3}\-?\d{3}$/i, function (req, res) {
 
 const admin2Router = require('./routes/admin2');
 const { func } = require('joi');
+const { env } = require('process');
 app.use('/admin2', admin2Router);
 
 app.use('/address-book', require('./routes/adress-book'));
@@ -195,6 +199,46 @@ app.get('/yahoo2', async function (req, res) {
 
   res.send(response.data);
 });
+
+// 登入的表單
+app.get('/login', async (req, res)=>{
+  res.render('login');
+});
+// 檢查登入帳密
+app.post('/login', async (req, res)=>{
+  const output = {
+    success: false,
+    error: '',
+    info: null,
+    token: '',
+    code: 0,
+};
+
+const [rs] = await db.query('SELECT * FROM admins WHERE account=?', [req.body.account]);
+
+if(! rs.length){
+    output.error = '帳密錯誤';
+    output.code = 401;
+    return res.json(output);
+}
+const row = rs[0];
+
+const compareResult = await bcrypt.compare(req.body.password, row.password);
+if(! compareResult){
+    output.error = '帳密錯誤';
+    output.code = 402;
+    return res.json(output);
+}
+
+const {account, avatar, nickname} = row;
+output.success = true;
+output.info = {account, avatar, nickname};
+
+output.token = jwt.sign( {account, avatar}, process.env.JWT_KEY)
+
+res.json(output);
+});
+
 
 app.use(function (req, res) {
   res.status(404).send('走錯路了');

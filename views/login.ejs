@@ -1,0 +1,68 @@
+<%- include('parts/html-header') %> <%- include('parts/navbar') %>
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-6">
+      <form name="form1" onsubmit="sendForm(event)">
+        <div class="mb-3">
+          <label for="account" class="form-label">account</label>
+          <input type="text" class="form-control" id="account" name="account" />
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">password</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+          />
+        </div>
+        <button type="submit" class="btn btn-primary">登入</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include('parts/scripts') %>
+<script>
+  async function sendForm(event) {
+    event.preventDefault();
+
+    const sendObj = {};
+    const fd = new FormData(document.form1);
+
+    for (let i of fd) {
+      sendObj[i[0]] = i[1];
+    }
+
+    const r = await fetch('', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(sendObj),
+    });
+    // const usp = new URLSearchParams(new FormData(document.form1));
+    //console.log(usp.toString());
+
+    // const r = await fetch('', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/x-www-form-urlencoded',
+    //   },
+    //   body: usp.toString(),
+    // });
+
+    const obj = await r.json();
+
+    if (obj.success) {
+      localStorage.setItem('admin_info', JSON.stringify(obj.info));
+      localStorage.setItem('admin_token', obj.token);
+      alert('登入成功');
+    } else {
+      alert(obj.error || '登入失敗');
+    }
+  }
+</script>
+
+<%- include('parts/html-foot') %>
